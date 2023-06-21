@@ -5,7 +5,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './CreateUser.css';
 import {v4 as uuidv4} from 'uuid';
-import Select from 'react-select';
 import Dropdown from 'basic-dropdown-shintot';
 import {UserContext} from '../../UserContext';
 import fr from 'date-fns/locale/fr';
@@ -31,35 +30,26 @@ const UserForm = () => {
     const countries = ['France', 'United States', 'Germany', 'Spain'];
 
     const handleSave = () => {
-        const user = {
-            id: uuidv4(),
-            firstName,
-            lastName,
-            department,
-            birthDate: birthDate ? birthDate.toISOString() : '',
-            startDate: startDate ? startDate.toISOString() : '',
-            address: {
-                street: address.street,
-                city: address.city,
-                zipCode: address.zipCode,
-                country: address.country,
-            },
-        };
-
-        const updatedUsers = [...users, user];
-
-        setUsers(updatedUsers);
-
-        setShowModal(true);
-
-        //console.log('User saved:', user);
-
-        const userList = JSON.parse(localStorage.getItem('users')) || [];
-        userList.push(user);
-        localStorage.setItem('users', JSON.stringify(userList));
-
-        setShowModal(true);
+    const user = {
+        id: uuidv4(),
+        firstName,
+        lastName,
+        department,
+        birthDate: birthDate ? birthDate.toISOString() : '',
+        startDate: startDate ? startDate.toISOString() : '',
+        address: {
+            street: address.street,
+            city: address.city,
+            zipCode: address.zipCode,
+            country: address.country,
+        },
     };
+
+    setUsers(user);
+
+    setShowModal(true);
+};
+
 
     const handleAddressChange = (e) => {
         setAddress({...address, [e.target.name]: e.target.value});

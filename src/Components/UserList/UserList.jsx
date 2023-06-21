@@ -13,12 +13,6 @@ const UserList = () => {
     const [usersPerPage] = useState(5);
 
 
-    useEffect(() => {
-        const userList = JSON.parse(localStorage.getItem('users')) || [];
-        setUsers(userList);
-    }, [setUsers]);
-
-
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
     };
