@@ -30,11 +30,6 @@ const UserList = () => {
     const handleSortButton = () => {
         setSortOption(sortOption === 'recent' ? 'oldest' : 'recent');
     };
-
-    const handleSortAlpha = (e) => {
-        setSortOption(e.target.value);
-    };
-
     const sortOptionsAlpha = ['asc', 'desc'];
 
     const renderSortOptionsAlpha = sortOptionsAlpha.map((option) => (
