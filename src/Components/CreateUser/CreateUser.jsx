@@ -1,11 +1,11 @@
 import React, {useContext, useState} from 'react';
-import Modal from 'react-modal';
 import {BsChevronBarDown, BsChevronBarUp} from 'react-icons/bs';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './CreateUser.css';
 import {v4 as uuidv4} from 'uuid';
-import Dropdown from 'basic-dropdown-shintot';
+import Modal from 'basic-modal-shintot';
+import Select from "react-dropdown";
 import {UserContext} from '../../UserContext';
 import fr from 'date-fns/locale/fr';
 
@@ -26,29 +26,42 @@ const UserForm = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [country, setCountry] = useState('');
 
-    const departments = ['HR', 'IT', 'Marketing', 'Finance'];
-    const countries = ['France', 'United States', 'Germany', 'Spain'];
+
+    const countries = [
+        {value: 'France', label: 'France'},
+        {value: 'United States', label: 'United States'},
+        {value: 'Germany', label: 'Germany'},
+        {value: 'Spain', label: 'Spain'},
+    ];
+
+    const departments = [
+        {value: 'HR', label: 'HR'},
+        {value: 'IT', label: 'IT'},
+        {value: 'Marketing', label: 'Marketing'},
+        {value: 'Finance', label: 'Finance'},
+    ];
+
 
     const handleSave = () => {
-    const user = {
-        id: uuidv4(),
-        firstName,
-        lastName,
-        department,
-        birthDate: birthDate ? birthDate.toISOString() : '',
-        startDate: startDate ? startDate.toISOString() : '',
-        address: {
-            street: address.street,
-            city: address.city,
-            zipCode: address.zipCode,
-            country: address.country,
-        },
+        const user = {
+            id: uuidv4(),
+            firstName,
+            lastName,
+            department,
+            birthDate: birthDate ? birthDate.toISOString() : '',
+            startDate: startDate ? startDate.toISOString() : '',
+            address: {
+                street: address.street,
+                city: address.city,
+                zipCode: address.zipCode,
+                country: address.country,
+            },
+        };
+
+        setUsers(user);
+
+        setShowModal(true);
     };
-
-    setUsers(user);
-
-    setShowModal(true);
-};
 
 
     const handleAddressChange = (e) => {
@@ -153,25 +166,24 @@ const UserForm = () => {
                     <label htmlFor="country" className="espace">
                         Pays
                     </label>
-                    <Dropdown
-                        options={countries.map((country) => ({
-                            value: country,
-                            text: country,
-                        }))}
-                        value={country}
-                        onChange={(selectedOption) => setCountry(selectedOption.value)}
+                    <Select
+                        className="react-dropdown-select "
+                        options={countries}
+                        value={countries.find(option => option.value === country)}
+                        onChange={(selectedOption) => {
+                            setCountry(selectedOption.value);
+                            setAddress({...address, country: selectedOption.value});
+                        }}
                     />
                 </div>
 
                 <label htmlFor="department" className="espace">
                     Pôle
                 </label>
-                <Dropdown
-                    options={departments.map((dept) => ({
-                        value: dept,
-                        text: dept,
-                    }))}
-                    value={department}
+                <Select
+                    className="react-dropdown-select "
+                    options={departments}
+                    value={departments.find(option => option.value === department)}
                     onChange={(selectedOption) => setDepartment(selectedOption.value)}
                 />
 
@@ -183,29 +195,15 @@ const UserForm = () => {
                 {isExpanded && <button onClick={handleSave}>Enregistrer</button>}
             </form>
 
-            <Modal
-                isOpen={showModal}
-                onRequestClose={() => setShowModal(false)}
-                contentLabel="Modal"
-                style={{
-                    overlay: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    },
-                    content: {
-                        backgroundColor: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        maxWidth: '400px',
-                        margin: ' 20rem auto',
-                        textAlign: 'center',
-                    },
-                }}
-                className="modal"
-            >
-                <h2>Employé Créer</h2>
-                <button onClick={() => setShowModal(false)}>Fermer</button>
-            </Modal>
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>Employé Créé</h2>
+                        <button onClick={() => setShowModal(false)}>Fermer</button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

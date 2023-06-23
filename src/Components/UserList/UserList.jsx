@@ -2,11 +2,13 @@ import React, {useContext, useEffect, useState} from 'react';
 import './UserList.css';
 import {BsFillArrowDownRightSquareFill, BsChevronDoubleLeft, BsChevronDoubleRight} from 'react-icons/bs';
 import {UserContext} from '../../UserContext';
+import { useTable, useSortBy, useFilters, usePagination } from 'react-table';
+
 
 
 const UserList = () => {
     const {users, selectedUser, setUsers, setSelectedUser} = useContext(UserContext); // Utilisation du contexte
-
+console.log(users)
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOption, setSortOption] = useState('recent');
     const [currentPage, setCurrentPage] = useState(1);
@@ -121,6 +123,10 @@ const UserList = () => {
                     <th>
                         Pays <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
                     </th>
+                    <th>
+                        Département <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
+                    </th>
+
                 </tr>
                 </thead>
                 <tbody>
@@ -136,6 +142,7 @@ const UserList = () => {
                         <td>{user.address.city}</td>
                         <td>{user.address.zipCode}</td>
                         <td>{user.address.country}</td>
+                        <td>{user.department}</td>
                     </tr>
                 ))}
                 </tbody>
