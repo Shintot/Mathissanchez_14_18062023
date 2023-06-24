@@ -16,6 +16,10 @@
   color: #ffffff;
 }
 
+.colorpagination {
+  color: white;
+}
+
 .flex {
   display: flex;
   justify-content: space-between;

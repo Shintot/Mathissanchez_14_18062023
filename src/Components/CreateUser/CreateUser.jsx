@@ -16,7 +16,7 @@ const UserForm = () => {
     const [birthDate, setBirthDate] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const {users, setUsers} = useContext(UserContext);
+    const { setUsers} = useContext(UserContext);
     const [address, setAddress] = useState({
         street: '',
         city: '',
@@ -71,12 +71,6 @@ const UserForm = () => {
     const handleToggleForm = () => {
         setIsExpanded(!isExpanded);
     };
-
-    const handleCountryChange = (selectedOption) => {
-        setCountry(selectedOption.value);
-        setAddress({...address, country: selectedOption.value});
-    };
-
     return (
         <div className={`container ${isExpanded ? 'expanded' : ''}`}>
             <img
@@ -195,15 +189,28 @@ const UserForm = () => {
                 {isExpanded && <button onClick={handleSave}>Enregistrer</button>}
             </form>
 
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2>Employé Créé</h2>
-                        <button onClick={() => setShowModal(false)}>Fermer</button>
-                    </div>
-                </div>
-            )}
-
+            <Modal
+                isOpen={showModal}
+                onRequestClose={() => setShowModal(false)}
+                contentLabel="Modal"
+                style={{
+                    overlay: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    },
+                    content: {
+                        backgroundColor: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        maxWidth: '400px',
+                        margin: ' 20rem auto',
+                        textAlign: 'center',
+                    },
+                }}
+                className="modal"
+            >
+                <h2>Employé Créer</h2>
+            </Modal>
         </div>
     );
 };

@@ -1,38 +1,96 @@
 import React, {useContext, useEffect, useState} from 'react';
+import {useTable, useSortBy, usePagination, useFilters} from 'react-table';
 import './UserList.css';
-import {BsFillArrowDownRightSquareFill, BsChevronDoubleLeft, BsChevronDoubleRight} from 'react-icons/bs';
 import {UserContext} from '../../UserContext';
-import { useTable, useSortBy, useFilters, usePagination } from 'react-table';
-
 
 
 const UserList = () => {
-    const {users, selectedUser, setUsers, setSelectedUser} = useContext(UserContext); // Utilisation du contexte
-console.log(users)
+    const {users, selectedUser, setSelectedUser} = useContext(UserContext);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOption, setSortOption] = useState('recent');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [usersPerPage] = useState(5);
+    const [searchResults, setSearchResults] = useState([]);
 
 
     const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+        const searchTerm = e.target.value;
+        setSearchTerm(searchTerm);
+
+        const filteredUsers = users.filter(
+            (user) =>
+                user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        setSearchResults(filteredUsers);
     };
 
-    const handleSort = (e) => {
-        setSortOption(e.target.value);
-    };
 
-    const handleSortButton = () => {
-        setSortOption(sortOption === 'recent' ? 'oldest' : 'recent');
-    };
-    const sortOptionsAlpha = ['asc', 'desc'];
+    const columns = React.useMemo(
+        () => [
+            {
+                Header: 'Prénom',
+                accessor: 'firstName',
+            },
+            {
+                Header: 'Nom',
+                accessor: 'lastName',
+            },
+            {
+                Header: 'Date de naissance',
+                accessor: 'birthDate',
+                Cell: ({value}) => value.split('T')[0],
+            },
+            {
+                Header: 'Date de début',
+                accessor: 'startDate',
+                Cell: ({value}) => value.split('T')[0],
+            },
+            {
+                Header: 'Rue',
+                accessor: 'address.street',
+            },
+            {
+                Header: 'Ville',
+                accessor: 'address.city',
+            },
+            {
+                Header: 'Code postal',
+                accessor: 'address.zipCode',
+            },
+            {
+                Header: 'Pays',
+                accessor: 'address.country',
+            },
+            {
+                Header: 'Département',
+                accessor: 'department',
+            },
+        ],
+        []
+    );
 
-    const renderSortOptionsAlpha = sortOptionsAlpha.map((option) => (
-        <option key={option} value={option}>
-            {option === 'asc' ? 'A à Z' : 'Z à A'}
-        </option>
-    ));
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        prepareRow,
+        pageOptions,
+        page,
+        state: {pageIndex, pageSize},
+        previousPage,
+        nextPage,
+        setPageSize,
+        canPreviousPage,
+        canNextPage,
+    } = useTable(
+        {
+            columns,
+            data: searchTerm ? searchResults : users,
+            initialState: {pageIndex: 0, pageSize: 5},
+        },
+        useFilters,
+        useSortBy,
+        usePagination
+    );
 
 
     const handleUserSelect = (user) => {
@@ -43,132 +101,85 @@ console.log(users)
         setSelectedUser(null);
     };
 
-    const filteredUsers = users.filter((user) =>
-        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const sortedUsers = [...filteredUsers].sort((a, b) => {
-        if (sortOption === 'recent') {
-            return new Date(b.startDate) - new Date(a.startDate);
-        } else if (sortOption === 'oldest') {
-            return new Date(a.startDate) - new Date(b.startDate);
-        } else if (sortOption === 'asc') {
-            return a.firstName.localeCompare(b.firstName);
-        } else if (sortOption === 'desc') {
-            return b.firstName.localeCompare(a.firstName);
-        } else {
-            return 0;
-        }
-    });
-
-
-    // Pagination
-    const indexOfLastUser = currentPage * usersPerPage;
-    const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
-    Array.from({length: totalPages}, (_, index) => index + 1);
-    const goToPreviousPage = () => {
-        setCurrentPage((prevPage) => prevPage - 1);
-    };
-
-    const goToNextPage = () => {
-        setCurrentPage((prevPage) => prevPage + 1);
-    };
-
     return (
         <div className="user-list">
             <h2>Liste des employé(e)s</h2>
-            <div className="flex">
+            <div>
                 <input
                     type="text"
                     placeholder="Rechercher un utilisateur"
                     value={searchTerm}
                     onChange={handleSearch}
                 />
-                <div className="sort-select">
-                    <label>Trier par :</label>
-                    <select value={sortOption} onChange={handleSort}>
-                        <option value="recent">Plus récent</option>
-                        <option value="oldest">Plus ancien</option>
-                        <optgroup label="Tri alphabétique">
-                            {renderSortOptionsAlpha}
-                        </optgroup>
-                    </select>
-                </div>
-
             </div>
-            <table>
+            <table {...getTableProps()}>
                 <thead>
-                <tr>
-                    <th>
-                        Nom <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Date de naissance <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Date de début <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Rue <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Ville <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Code postal <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Pays <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-                    <th>
-                        Département <BsFillArrowDownRightSquareFill onClick={handleSortButton}/>
-                    </th>
-
-                </tr>
-                </thead>
-                <tbody>
-                {currentUsers.map((user) => (
-                    <tr key={user.id} onClick={() => handleUserSelect(user)}
-                        className={selectedUser === user ? 'selected' : ''}>
-                        <td>
-                            {user.firstName} {user.lastName}
-                        </td>
-                        <td>{user.birthDate.split('T')[0]}</td>
-                        <td>{user.startDate.split('T')[0]}</td>
-                        <td>{user.address.street}</td>
-                        <td>{user.address.city}</td>
-                        <td>{user.address.zipCode}</td>
-                        <td>{user.address.country}</td>
-                        <td>{user.department}</td>
+                {headerGroups.map((headerGroup) => (
+                    <tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map((column) => (
+                            <th
+                                {...column.getHeaderProps(column.getSortByToggleProps())}
+                            >
+                                {column.render('Header')}
+                                <span>
+                    {column.isSorted
+                        ? column.isSortedDesc
+                            ? ' 🔽'
+                            : ' 🔼'
+                        : ''}
+                  </span>
+                            </th>
+                        ))}
                     </tr>
                 ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                {page.map((row) => {
+                    const user = searchTerm ? searchResults[row.index] : row.original;
+
+                    prepareRow(row);
+                    return (
+                        <tr
+                            {...row.getRowProps()}
+                            onClick={() => handleUserSelect(user)}
+                            className={selectedUser === user ? 'selected' : ''}
+                        >
+                            {row.cells.map((cell) => {
+                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+                            })}
+                        </tr>
+                    );
+                })}
+
                 </tbody>
             </table>
             <div className="pagination">
-                {currentPage > 1 && (
-                    <button onClick={goToPreviousPage}>
-                        <BsChevronDoubleLeft/>
-                    </button>
-                )}
-                <div className="page-number">{currentPage}</div>
-                {currentPage < totalPages && (
-                    <button onClick={goToNextPage}>
-                        <BsChevronDoubleRight/>
-                    </button>
-                )}
+                <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+                    Précédent
+                </button>
+                <span className="colorpagination">
+          Page{' '}
+                    <strong>
+            {pageIndex + 1} sur {pageOptions.length}
+          </strong>{' '}
+        </span>
+                <button onClick={() => nextPage()} disabled={!canNextPage}>
+                    Suivant
+                </button>
             </div>
 
             {selectedUser && (
                 <div className="user-profile">
-                    <h3>{selectedUser.firstName} {selectedUser.lastName}</h3>
+                    <h3>
+                        {selectedUser.firstName} {selectedUser.lastName}
+                    </h3>
                     <div>
-                        <strong>Date de naissance:</strong> {selectedUser.birthDate.split('T')[0]}
+                        <strong>Date de naissance:</strong>{' '}
+                        {selectedUser.birthDate.split('T')[0]}
                     </div>
                     <div>
-                        <strong>Date de début:</strong> {selectedUser.startDate.split('T')[0]}
+                        <strong>Date de début:</strong>{' '}
+                        {selectedUser.startDate.split('T')[0]}
                     </div>
                     <div>
                         <strong>Rue:</strong> {selectedUser.address.street}
@@ -190,3 +201,5 @@ console.log(users)
 };
 
 export default UserList;
+
+
