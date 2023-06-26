@@ -16,7 +16,7 @@ const UserForm = () => {
     const [birthDate, setBirthDate] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const { setUsers} = useContext(UserContext);
+    const {setUsers} = useContext(UserContext);
     const [address, setAddress] = useState({
         street: '',
         city: '',
@@ -59,8 +59,20 @@ const UserForm = () => {
         };
 
         setUsers(user);
-
         setShowModal(true);
+
+        setFirstName('');
+        setLastName('');
+        setDepartment('');
+        setBirthDate(null);
+        setStartDate(null);
+        setAddress({
+            street: '',
+            city: '',
+            zipCode: '',
+            country: '',
+        });
+        setCountry('');
     };
 
 

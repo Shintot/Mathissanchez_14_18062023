@@ -3,12 +3,11 @@ import {useTable, useSortBy, usePagination, useFilters} from 'react-table';
 import './UserList.css';
 import {UserContext} from '../../UserContext';
 
-
 const UserList = () => {
     const {users, selectedUser, setSelectedUser} = useContext(UserContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-
+    const [pageSize, setPageSize] = useState(5); // Ajout du state pour le nombre d'utilisateurs par page
 
     const handleSearch = (e) => {
         const searchTerm = e.target.value;
@@ -22,7 +21,6 @@ const UserList = () => {
 
         setSearchResults(filteredUsers);
     };
-
 
     const columns = React.useMemo(
         () => [
@@ -75,23 +73,22 @@ const UserList = () => {
         prepareRow,
         pageOptions,
         page,
-        state: {pageIndex, pageSize},
+        state: {pageIndex},
         previousPage,
         nextPage,
-        setPageSize,
         canPreviousPage,
         canNextPage,
+        setPageSize: setTablePageSize,
     } = useTable(
         {
             columns,
             data: searchTerm ? searchResults : users,
-            initialState: {pageIndex: 0, pageSize: 5},
+            initialState: {pageIndex: 0, pageSize: pageSize},
         },
         useFilters,
         useSortBy,
         usePagination
     );
-
 
     const handleUserSelect = (user) => {
         setSelectedUser(user);
@@ -101,32 +98,44 @@ const UserList = () => {
         setSelectedUser(null);
     };
 
+    useEffect(() => {
+        setTablePageSize(pageSize);
+    }, [pageSize, setTablePageSize]);
+
+    const handlePageSizeChange = (e) => {
+        setPageSize(Number(e.target.value));
+    };
+
     return (
         <div className="user-list">
             <h2>Liste des employé(e)s</h2>
-            <div>
-                <input
-                    type="text"
-                    placeholder="Rechercher un utilisateur"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                />
+            <div className="tableflex">
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Rechercher un utilisateur"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                    />
+                </div>
+                <div>
+                    <select value={pageSize} onChange={handlePageSizeChange}>
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
             </div>
             <table {...getTableProps()}>
                 <thead>
                 {headerGroups.map((headerGroup) => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
                         {headerGroup.headers.map((column) => (
-                            <th
-                                {...column.getHeaderProps(column.getSortByToggleProps())}
-                            >
+                            <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                                 {column.render('Header')}
                                 <span>
-                    {column.isSorted
-                        ? column.isSortedDesc
-                            ? ' 🔽'
-                            : ' 🔼'
-                        : ''}
+                    {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
                   </span>
                             </th>
                         ))}
@@ -150,7 +159,6 @@ const UserList = () => {
                         </tr>
                     );
                 })}
-
                 </tbody>
             </table>
             <div className="pagination">
@@ -174,12 +182,10 @@ const UserList = () => {
                         {selectedUser.firstName} {selectedUser.lastName}
                     </h3>
                     <div>
-                        <strong>Date de naissance:</strong>{' '}
-                        {selectedUser.birthDate.split('T')[0]}
+                        <strong>Date de naissance:</strong> {selectedUser.birthDate.split('T')[0]}
                     </div>
                     <div>
-                        <strong>Date de début:</strong>{' '}
-                        {selectedUser.startDate.split('T')[0]}
+                        <strong>Date de début:</strong> {selectedUser.startDate.split('T')[0]}
                     </div>
                     <div>
                         <strong>Rue:</strong> {selectedUser.address.street}
@@ -201,5 +207,3 @@ const UserList = () => {
 };
 
 export default UserList;
-
-

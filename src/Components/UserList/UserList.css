@@ -9,6 +9,11 @@
   color: #333333;
     position: relative;
 }
+.tableflex {
+  display: flex;
+  justify-content: space-between;
+}
+
 
 .user-list h2 {
   text-align: center;
